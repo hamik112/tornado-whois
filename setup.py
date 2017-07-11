@@ -8,7 +8,7 @@ except IOError:
 
 setup(
     name="tornado-whois",
-    version="0.5",
+    version="0.6",
     keywords=["tornado", "whois", "tornado-whois", "asyncwhois"],
     description="Asynchronous python tornado whois client",
     long_description=readme,
