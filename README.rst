@@ -12,11 +12,9 @@ Example
     from tornadowhois import AsyncWhoisClient
 
 
-    @gen.coroutine
-    def main():
-
-        data = yield AsyncWhoisClient().lookup("example.com")
-        print data
+    async def main():
+        data = await AsyncWhoisClient().lookup("example.com")
+        print(data)
 
     ioloop.IOLoop.current().run_sync(main)
 
@@ -32,12 +30,8 @@ Example with non-blocking resolver
 
     resolver = CaresResolver()
 
-
-    @gen.coroutine
-    def main():
-
-        data = yield AsyncWhoisClient(resolver).lookup("example.com")
-        print data
+    async def main():
+        data = await AsyncWhoisClient(resolver).lookup("example.com")
+        print(data)
 
     ioloop.IOLoop.current().run_sync(main)
-
