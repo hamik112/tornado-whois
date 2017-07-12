@@ -9,6 +9,12 @@ logger = logging.getLogger(__name__)
 class AsyncWhoisClient(object):
 
     default_server = "whois.verisign-grs.com"
+    servers = {
+        "com": "whois.verisign-grs.com",
+        "io": "whois.nic.io",
+        "net": "whois.verisign-grs.com",
+        "org": "whois.pir.org"
+    }
     timeout_sec = 3
     whois_port = 43
     resolver = None
@@ -24,7 +30,7 @@ class AsyncWhoisClient(object):
         return(results)
 
     async def find_records(self, name, server, results):
-        record = await self.whois_query(name, server)
+        record = await self.whois_query(name)
         results.append((server, record,))
 
         next_server = self._read_next_server_name(record)
@@ -37,7 +43,13 @@ class AsyncWhoisClient(object):
             next_server = self._read_next_server_name(record)
         return(record)
 
-    async def whois_query(self, name, server):
+    async def whois_query(self, name):
+        if name[-3:] == "com":
+            server = self.servers.get('com', self.default_server)
+        elif name[-2:] == "io":
+            server = self.servers.get('io', self.default_server)
+        else:
+            server = self.default_server
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
         stream = iostream.IOStream(sock)
 

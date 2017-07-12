@@ -3,6 +3,13 @@ Tornado-Whois
 
 Asynchronous Whois client for tornado framework
 
+Installation
+~~~~~~~~~~~~
+
+::
+
+    pip install tornado-whois
+
 Example
 ~~~~~~~
 
@@ -16,7 +23,7 @@ Example
         data = await AsyncWhoisClient().lookup("example.com")
         print(data)
 
-    ioloop.IOLoop.current().run_sync(main)
+    ioloop.IOLoop.current().spawn_callback(main)
 
 
 Example with non-blocking resolver
@@ -34,4 +41,4 @@ Example with non-blocking resolver
         data = await AsyncWhoisClient(resolver).lookup("example.com")
         print(data)
 
-    ioloop.IOLoop.current().run_sync(main)
+    ioloop.IOLoop.current().spawn_callback(main)
