@@ -15,30 +15,17 @@ Example
 
 ::
 
-    from tornado import ioloop, gen
+    from tornado import ioloop
     from tornadowhois import AsyncWhoisClient
-
-
-    async def main():
-        data = await AsyncWhoisClient().lookup("example.com")
-        print(data)
-
-    ioloop.IOLoop.current().spawn_callback(main)
-
-
-Example with non-blocking resolver
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-::
-
-    from tornado import ioloop, gen
     from tornado.platform.caresresolver import CaresResolver
-    from tornadowhois import AsyncWhoisClient
-
-    resolver = CaresResolver()
 
     async def main():
-        data = await AsyncWhoisClient(resolver).lookup("example.com")
-        print(data)
+        whois = AsyncWhoisClient(CaresResolver())
+        is_available = await whois.check_domain("tornadoweb.org")
+        if is_available:
+            print("tornadoweb.org is available")
+
+        read_result = await whois.whois_query("tornadoweb.org")
+        print(read_result)
 
     ioloop.IOLoop.current().spawn_callback(main)
