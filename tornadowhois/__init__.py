@@ -10,12 +10,12 @@ class AsyncWhoisClient(object):
 
     default_server = "whois.verisign-grs.com"
     servers = {
-        "com": "whois.verisign-grs.com",
-        "io": "whois.nic.io",
-        "net": "whois.verisign-grs.com",
-        "org": "whois.pir.org"
+        "com": {"message":"No match for", "server":"whois.verisign-grs.com"},
+        "net": {"message":"No match for", "server":"whois.verisign-grs.com"},
+        "org": {"message":"NOT FOUND", "server":"whois.pir.org"},
+        "io": {"message":"NOT FOUND", "server":"whois.nic.io"},
     }
-    timeout_sec = 3
+    timeout_sec = 5
     whois_port = 43
     resolver = None
 
@@ -43,27 +43,32 @@ class AsyncWhoisClient(object):
             next_server = self._read_next_server_name(record)
         return(record)
 
-    async def whois_query(self, name):
-        if name[-3:] == "com":
-            server = self.servers.get('com', self.default_server)
-        elif name[-2:] == "io":
-            server = self.servers.get('io', self.default_server)
-        else:
-            server = self.default_server
+
+    def get_domain_information(self, domain):
+        for extension in list(self.servers.keys()):
+            if domain.endswith(".%s" % extension):
+                return self.servers.get(extension)
+        return self.servers.get("com")
+
+    async def whois_query(self, domain):
+        server = self.get_domain_information(domain)['server']
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
         stream = iostream.IOStream(sock)
-
-        logging.debug("Requesting {} whois for {}".format(server, name))
-
+        logging.debug("Requesting {} whois for {}".format(server, domain))
         if self.resolver and not self.is_valid_ip(server):
             server = await self._get_ip_by_name(server)
-
         await stream.connect((server, self.whois_port))
-
-        domain = '%s%s' % (name, "\r\n")
+        domain = '%s%s' % (domain, "\r\n")
         await stream.write(domain.encode())
         data = await stream.read_until_close()
         return data
+
+    async def check_domain(self, domain):
+        information = self.get_domain_information(domain)
+        result = await self.whois_query(domain)
+        if information["message"] in str(result):
+            return True
+        return False
 
     async def _get_ip_by_name(self, address):
         data = await self.resolver.resolve(address, None, socket.AF_INET)
